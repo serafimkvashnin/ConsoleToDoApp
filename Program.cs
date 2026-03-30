@@ -12,7 +12,9 @@ class Program
         while (true)
         {
             Console.Write("> ");
-            string? input = Console.ReadLine()?.Trim();
+            string? input = Console.ReadLine();
+            if (input is null) return; // EOF — exit cleanly
+            input = input.Trim();
 
             if (string.IsNullOrEmpty(input)) continue;
 

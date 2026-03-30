@@ -17,7 +17,7 @@ class TodoRepository
     public bool Complete(int id)
     {
         var item = _items.FirstOrDefault(i => i.Id == id);
-        if (item is null) return false;
+        if (item is null || item.IsCompleted) return false;
         item.IsCompleted = true;
         return true;
     }
