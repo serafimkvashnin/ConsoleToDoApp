@@ -7,13 +7,13 @@ class Program
     static void Main(string[] args)
     {
         Console.WriteLine("=== Console ToDo App ===");
-        Console.WriteLine("Commands: add, list, complete, delete, due, search, quit\n");
+        Console.WriteLine("Commands: add, list, complete, delete, due, search, priority, page, nearest, stats, quit\n");
 
         while (true)
         {
             Console.Write("> ");
             string? input = Console.ReadLine();
-            if (input is null) return; // EOF — exit cleanly
+            if (input is null) return;
             input = input.Trim();
 
             if (string.IsNullOrEmpty(input)) continue;
@@ -41,6 +41,18 @@ class Program
                     break;
                 case "search":
                     HandleSearch(argument);
+                    break;
+                case "priority":
+                    HandlePriority(argument);
+                    break;
+                case "page":
+                    HandlePage(argument);
+                    break;
+                case "nearest":
+                    HandleNearest();
+                    break;
+                case "stats":
+                    HandleStats();
                     break;
                 case "quit":
                 case "exit":
@@ -109,7 +121,11 @@ class Program
             Console.WriteLine("Usage: due <id> <yyyy-MM-dd>");
             return;
         }
-        DateTime dueDate = DateTime.Parse(parts[1]);
+        if (!DateTime.TryParse(parts[1], out DateTime dueDate))
+        {
+            Console.WriteLine("Invalid date format. Use yyyy-MM-dd.");
+            return;
+        }
         Console.WriteLine(_repo.SetDue(id, dueDate) ? $"Due date set for task {id}." : $"Task {id} not found.");
     }
 
@@ -128,5 +144,50 @@ class Program
         }
         foreach (var item in results)
             Console.WriteLine(item);
+    }
+
+    static void HandlePriority(string arg)
+    {
+        string[] parts = arg.Split(' ', 2);
+        if (parts.Length < 2 || !int.TryParse(parts[0], out int id))
+        {
+            Console.WriteLine("Usage: priority <id> <low|normal|high>");
+            return;
+        }
+        Console.WriteLine(_repo.SetPriority(id, parts[1]) ? $"Priority updated for task {id}." : $"Task {id} not found.");
+    }
+
+    static void HandlePage(string arg)
+    {
+        if (!int.TryParse(arg, out int page) || page < 1)
+        {
+            Console.WriteLine("Usage: page <number> (starting from 1)");
+            return;
+        }
+        var results = _repo.GetPage(page, 5);
+        if (results.Count == 0)
+        {
+            Console.WriteLine("No tasks on this page.");
+            return;
+        }
+        foreach (var item in results)
+            Console.WriteLine(item);
+    }
+
+    static void HandleNearest()
+    {
+        var item = _repo.GetNearest();
+        if (item is null)
+        {
+            Console.WriteLine("No upcoming tasks.");
+            return;
+        }
+        Console.WriteLine(item);
+    }
+
+    static void HandleStats()
+    {
+        var (total, completed, pending) = _repo.GetStats();
+        Console.WriteLine($"Total: {total} | Completed: {completed} | Pending: {pending}");
     }
 }
