@@ -40,6 +40,34 @@ class TodoRepository
 
     public IReadOnlyList<TodoItem> Search(string query)
     {
-        return _items.Where(i => i.Title.Contains(query)).ToList();
+        return _items.Where(i => i.Title.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    public bool SetPriority(int id, string priority)
+    {
+        var item = _items.FirstOrDefault(i => i.Id == id);
+        if (item is null) return false;
+        item.Priority = priority;
+        return true;
+    }
+
+    public IReadOnlyList<TodoItem> GetPage(int page, int size)
+    {
+        return _items.Skip(page * size).Take(size).ToList();
+    }
+
+    public TodoItem? GetNearest()
+    {
+        return _items
+            .Where(i => !i.IsCompleted)
+            .OrderBy(i => i.DueDate)
+            .FirstOrDefault();
+    }
+
+    public (int total, int completed, int pending) GetStats()
+    {
+        int total = _items.Count;
+        int completed = _items.Count(i => i.IsCompleted);
+        return (total, completed, total - completed);
     }
 }
