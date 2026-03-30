@@ -29,4 +29,17 @@ class TodoRepository
         _items.Remove(item);
         return true;
     }
+
+    public bool SetDue(int id, DateTime dueDate)
+    {
+        var item = _items.FirstOrDefault(i => i.Id == id);
+        if (item is null) return false;
+        item.DueDate = dueDate;
+        return true;
+    }
+
+    public IReadOnlyList<TodoItem> Search(string query)
+    {
+        return _items.Where(i => i.Title.Contains(query)).ToList();
+    }
 }
