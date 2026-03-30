@@ -6,10 +6,12 @@ class TodoItem
     public string Title { get; init; } = string.Empty;
     public bool IsCompleted { get; set; }
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+    public DateTime? DueDate { get; set; }
 
     public override string ToString()
     {
         string status = IsCompleted ? "[x]" : "[ ]";
-        return $"{Id}. {status} {Title}";
+        string due = DueDate.HasValue ? $" (due: {DueDate.Value:yyyy-MM-dd})" : string.Empty;
+        return $"{Id}. {status} {Title}{due}";
     }
 }

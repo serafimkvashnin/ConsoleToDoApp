@@ -7,7 +7,7 @@ class Program
     static void Main(string[] args)
     {
         Console.WriteLine("=== Console ToDo App ===");
-        Console.WriteLine("Commands: add, list, complete, delete, quit\n");
+        Console.WriteLine("Commands: add, list, complete, delete, due, search, quit\n");
 
         while (true)
         {
@@ -35,6 +35,12 @@ class Program
                     break;
                 case "delete":
                     HandleDelete(argument);
+                    break;
+                case "due":
+                    HandleDue(argument);
+                    break;
+                case "search":
+                    HandleSearch(argument);
                     break;
                 case "quit":
                 case "exit":
@@ -88,5 +94,39 @@ class Program
             return;
         }
         Console.WriteLine(_repo.Delete(id) ? $"Task {id} deleted." : $"Task {id} not found.");
+    }
+
+    static void HandleDue(string arg)
+    {
+        string[] parts = arg.Split(' ', 2);
+        if (parts.Length < 2)
+        {
+            Console.WriteLine("Usage: due <id> <yyyy-MM-dd>");
+            return;
+        }
+        if (!int.TryParse(parts[0], out int id))
+        {
+            Console.WriteLine("Usage: due <id> <yyyy-MM-dd>");
+            return;
+        }
+        DateTime dueDate = DateTime.Parse(parts[1]);
+        Console.WriteLine(_repo.SetDue(id, dueDate) ? $"Due date set for task {id}." : $"Task {id} not found.");
+    }
+
+    static void HandleSearch(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            Console.WriteLine("Usage: search <query>");
+            return;
+        }
+        var results = _repo.Search(query);
+        if (results.Count == 0)
+        {
+            Console.WriteLine("No matching tasks.");
+            return;
+        }
+        foreach (var item in results)
+            Console.WriteLine(item);
     }
 }
